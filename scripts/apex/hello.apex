@@ -1,10 +1,29 @@
-// Use .apex files to store anonymous Apex.
-// You can execute anonymous Apex in VS Code by selecting the
-//     apex text and running the command:
-//     SFDX: Execute Anonymous Apex with Currently Selected Text
-// You can also execute the entire file by running the command:
-//     SFDX: Execute Anonymous Apex with Editor Contents
+/*
+// Question 7
+* Opportunity Trigger
+* When an opportunity is updated set the primary contact on the opportunity to the contact on the same account with the title of 'CEO'.
+* Trigger should only fire on update.
+*/
+        
+List<Opportunity> oppList = [SELECT Id, Name, Primary_Contact__c, AccountId FROM Opportunity WHERE StageName = 'Closed Won'];
 
-string tempvar = 'Enter_your_name_here';
-System.debug('Hello World!');
-System.debug('My name is ' + tempvar);
+/** ----- DON'T USE THE ABOVE ----- */
+Id contactAccountId;
+Id oppAccountId;
+List<Contact> ceoList = [SELECT Id, Name, Title, AccountId FROM Contact WHERE Title = 'CEO'];
+
+//for (Opportunity o : Trigger.new) {
+for (Opportunity o : oppList) {
+    oppAccountId = o.AccountId;
+    for (Contact c : ceoList) {
+        contactAccountId = c.AccountId;
+        if (contactAccountId == oppAccountId) {
+            System.debug('Opportunity: ' + o.Name + '. Searching for CEO contact...');
+            o.Primary_Contact__c = c.Id;
+            System.debug('CEO identified: ' + c.Name + ', ' + c.Title + '.');
+        }
+    }
+}
+
+
+
