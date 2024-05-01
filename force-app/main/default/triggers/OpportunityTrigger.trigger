@@ -8,18 +8,23 @@ trigger OpportunityTrigger on Opportunity (before update, after update, before d
             }
         }
         // Question #7
-        Id contactAccountId;
-        Id oppAccountId;
-        List<Contact> ceoList = [SELECT Id, Name, Title, AccountId FROM Contact WHERE Title = 'CEO'];
-        for (Opportunity o : Trigger.new) {
-            oppAccountId = o.AccountId;
-            for (Contact c : ceoList) {
-                contactAccountId = c.AccountId;
-                if (contactAccountId == oppAccountId) {
-                    o.Primary_Contact__c = c.Id;
-                }
-            }
+        Set<Id> opportunityAccountIds = new Set<Id>();
+
+        for (Opportunity opp : Trigger.new) {
+            opportunityAccountIds.add(opp.AccountId);
         }
+
+        for (Id oppAcctId : opportunityAccountIds) {
+            System.debug(oppAcctId);
+        }
+
+        /** Map<Id,Account> accountMap = new Map<Id,Account>();
+        accountMap = [SELECT Id, Name, (SELECT Id FROM Contacts WHERE Title = 'CEO') FROM Account WHERE Id IN :opportunityAccountIds]; */
+
+        Map<Id,Account> accountMap = new Map<Id,Account>(
+            [SELECT Id, Name, (SELECT Id FROM Contacts WHERE Title = 'CEO') FROM Account WHERE Id IN :opportunityAccountIds]
+        );
+
         
     }
 
