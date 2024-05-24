@@ -8,24 +8,25 @@ trigger OpportunityTrigger on Opportunity (before update, after update, before d
             }
         }
         // Question #7
-        Set<Id> opportunityAccountIds = new Set<Id>();
+        // Set of account Ids related to opps that were just updated
+        List<Id> opportunityAccountIds = new List<Id>();
 
+        // Add the account Ids to the set I created above
         for (Opportunity opp : Trigger.new) {
             opportunityAccountIds.add(opp.AccountId);
         }
 
-        for (Id oppAcctId : opportunityAccountIds) {
-            System.debug(oppAcctId);
+        // Grab CEO contacts from accounts in Map above
+        List<Contact> ceoContacts = [SELECT Id, Name, Title, AccountId FROM Contact WHERE AccountId = :opportunityAccountIds AND Title = 'CEO'];
+        Map<Id,Id> accountsAndContacts = new Map<Id,Id>();
+        for (Contact c : ceoContacts) {
+            accountsAndContacts.put(c.AccountId, c.Id);
         }
 
-        /** Map<Id,Account> accountMap = new Map<Id,Account>();
-        accountMap = [SELECT Id, Name, (SELECT Id FROM Contacts WHERE Title = 'CEO') FROM Account WHERE Id IN :opportunityAccountIds]; */
-
-        Map<Id,Account> accountMap = new Map<Id,Account>(
-            [SELECT Id, Name, (SELECT Id FROM Contacts WHERE Title = 'CEO') FROM Account WHERE Id IN :opportunityAccountIds]
-        );
-
-        
+        // Assign the CEO contact as the primary contact if the AccountIds match
+        for (Opportunity opp : Trigger.new) {
+            opp.Primary_Contact__c = accountsAndContacts.get(opp.AccountId);
+        }
     }
 
     // Question #6
