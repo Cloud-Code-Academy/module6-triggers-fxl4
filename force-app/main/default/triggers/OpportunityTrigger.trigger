@@ -9,7 +9,7 @@ trigger OpportunityTrigger on Opportunity (before update, after update, before d
         }
         // Question #7
         // Set of account Ids related to opps that were just updated
-        List<Id> opportunityAccountIds = new List<Id>();
+        /** List<Id> opportunityAccountIds = new List<Id>();
 
         // Add the account Ids to the set I created above
         for (Opportunity opp : Trigger.new) {
@@ -26,20 +26,20 @@ trigger OpportunityTrigger on Opportunity (before update, after update, before d
         // Assign the CEO contact as the primary contact if the AccountIds match
         for (Opportunity opp : Trigger.new) {
             opp.Primary_Contact__c = accountsAndContacts.get(opp.AccountId);
-        }
+        } */
     }
 
     // Question #6
     if (Trigger.isBefore && Trigger.isDelete) {   
-        Boolean closedWonBankOpp = false;
-        List<Opportunity> wonBankOppList = new List<Opportunity>();
-        for (Opportunity opp : Trigger.old) {    
-            if (opp.Account.Industry == 'Banking' && opp.StageName == 'Closed Won') {
-                closedWonBankOpp = true;
+        Account mainAccount;
+        List<Opportunity> wonBankOpps = new List<Opportunity>();
+        for (Opportunity opp : Trigger.old) {  
+            mainAccount = opp.Account;  
+            if (mainAccount.Industry == 'Banking' && opp.StageName == 'Closed Won') {
+                wonBankOpps.add(opp);
             }
-            wonBankOppList.add(opp);
         }
-        for (Opportunity listItem : wonBankOppList) {
+        for (Opportunity listItem : wonBankOpps) {
             listItem.addError('Cannot delete closed opportunity for a banking account that is won');
         }
     }
