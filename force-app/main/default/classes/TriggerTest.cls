@@ -299,6 +299,7 @@ public with sharing class TriggerTest {
 	 * Error Message: 'Cannot delete closed opportunity for a banking account that is won'
 	 * Trigger should only fire on delete.
 	 */
+    
     @IsTest
     static void testOpportunityTrigger_deleteCloseWonOpportunity() {
         // Prepare the test data
